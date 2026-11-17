@@ -1,11 +1,8 @@
 package com.project.student.dto.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,41 +14,26 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Request body for updating an existing student")
 public class StudentUpdateRequest {
 
-    @NotBlank(message = "First name must not be blank")
-    @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
-    @Schema(description = "First name of the student", example = "John")
+    @NotBlank(message = "First name is required")
     private String firstName;
 
-    @NotBlank(message = "Last name must not be blank")
-    @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
-    @Schema(description = "Last name of the student", example = "Doe")
+    @NotBlank(message = "Last name is required")
     private String lastName;
 
-    @NotBlank(message = "Email must not be blank")
-    @Email(message = "Email must be valid")
-    @Size(max = 100, message = "Email cannot exceed 100 characters")
-    @Schema(description = "Unique email address of the student", example = "john.doe@university.edu")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email should be valid")
     private String email;
 
-    @NotNull(message = "Date of birth must not be null")
-    @Past(message = "Date of birth must be a date in the past")
-    @Schema(description = "Date of birth of the student", example = "2002-05-15")
+    @NotNull(message = "Date of birth is required")
     private LocalDate dateOfBirth;
 
-    @NotBlank(message = "Department must not be blank")
-    @Size(min = 2, max = 100, message = "Department must be between 2 and 100 characters")
-    @Schema(description = "Department or major of the student", example = "Software Engineering")
+    @NotBlank(message = "Department is required")
     private String department;
 
-    @NotBlank(message = "Enrollment number must not be blank")
-    @Size(min = 3, max = 50, message = "Enrollment number must be between 3 and 50 characters")
-    @Schema(description = "Unique enrollment or roll number", example = "CS-2026-001")
+    @NotBlank(message = "Enrollment number is required")
     private String enrollmentNumber;
 
-    @NotNull(message = "Active status must not be null")
-    @Schema(description = "Indicates whether the student record is active", example = "true")
     private Boolean isActive;
 }

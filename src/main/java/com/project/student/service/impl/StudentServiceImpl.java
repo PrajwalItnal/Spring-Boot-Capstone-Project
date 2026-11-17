@@ -17,142 +17,140 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class StudentServiceImpl implements StudentService {
 
     private static final Logger log = LoggerFactory.getLogger(StudentServiceImpl.class);
-
     private final StudentRepository studentRepository;
 
     @Override
     public StudentResponse createStudent(StudentCreateRequest request) {
-        log.info("Attempting to create student with email: {} and enrollment: {}",
-                request.getEmail(), request.getEnrollmentNumber());
+        log.info("Creating student with email: {}", request.getEmail());
 
         if (studentRepository.existsByEmail(request.getEmail())) {
-            log.warn("Failed to create student: Email '{}' already registered", request.getEmail());
             throw new BusinessRuleViolationException(
-                    String.format("Student with email '%s' already exists", request.getEmail()));
+                    "Student with email '" + request.getEmail() + "' already exists");
         }
 
         if (studentRepository.existsByEnrollmentNumber(request.getEnrollmentNumber())) {
-            log.warn("Failed to create student: Enrollment number '{}' already exists",
-                    request.getEnrollmentNumber());
             throw new BusinessRuleViolationException(
-                    String.format("Student with enrollment number '%s' already exists",
-                            request.getEnrollmentNumber()));
+                    "Student with enrollment number '" + request.getEnrollmentNumber() + "' already exists");
         }
 
         Student student = Student.builder()
-                .firstName(request.getFirstName().trim())
-                .lastName(request.getLastName().trim())
-                .email(request.getEmail().trim().toLowerCase())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
                 .dateOfBirth(request.getDateOfBirth())
-                .department(request.getDepartment().trim())
-                .enrollmentNumber(request.getEnrollmentNumber().trim().toUpperCase())
+                .department(request.getDepartment())
+                .enrollmentNumber(request.getEnrollmentNumber())
                 .isActive(true)
                 .build();
 
-        Student savedStudent = studentRepository.save(student);
-        log.info("Successfully created student with id: {}", savedStudent.getId());
-        return StudentResponse.fromEntity(savedStudent);
+        Student saved = studentRepository.save(student);
+        return mapToResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public StudentResponse getStudentById(Long id) {
-        log.info("Fetching student with id: {}", id);
+        log.info("Getting student by id: {}", id);
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student", "id", id));
-        return StudentResponse.fromEntity(student);
+        return mapToResponse(student);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public PageResponse<StudentResponse> getAllStudents(int page, int size, String sortBy, String sortDir) {
-        log.info("Fetching all students - page: {}, size: {}, sortBy: {}, sortDir: {}",
-                page, size, sortBy, sortDir);
-
-        Pageable pageable = createPageable(page, size, sortBy, sortDir);
+        log.info("Getting all students - page: {}, size: {}", page, size);
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Student> studentPage = studentRepository.findAll(pageable);
-        return PageResponse.from(studentPage.map(StudentResponse::fromEntity));
+
+        return mapToPageResponse(studentPage);
     }
 
     @Override
     public StudentResponse updateStudent(Long id, StudentUpdateRequest request) {
-        log.info("Attempting to update student with id: {}", id);
-
+        log.info("Updating student id: {}", id);
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student", "id", id));
 
-        if (studentRepository.existsByEmailAndIdNot(request.getEmail().trim().toLowerCase(), id)) {
-            log.warn("Failed to update student {}: Email '{}' already taken by another student",
-                    id, request.getEmail());
-            throw new BusinessRuleViolationException(
-                    String.format("Email '%s' is already in use by another student", request.getEmail()));
+        if (studentRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
+            throw new BusinessRuleViolationException("Email is already used by another student");
         }
 
-        if (studentRepository.existsByEnrollmentNumberAndIdNot(
-                request.getEnrollmentNumber().trim().toUpperCase(), id)) {
-            log.warn("Failed to update student {}: Enrollment '{}' already taken by another student",
-                    id, request.getEnrollmentNumber());
-            throw new BusinessRuleViolationException(
-                    String.format("Enrollment number '%s' is already in use by another student",
-                            request.getEnrollmentNumber()));
+        if (studentRepository.existsByEnrollmentNumberAndIdNot(request.getEnrollmentNumber(), id)) {
+            throw new BusinessRuleViolationException("Enrollment number is already used by another student");
         }
 
-        student.setFirstName(request.getFirstName().trim());
-        student.setLastName(request.getLastName().trim());
-        student.setEmail(request.getEmail().trim().toLowerCase());
+        student.setFirstName(request.getFirstName());
+        student.setLastName(request.getLastName());
+        student.setEmail(request.getEmail());
         student.setDateOfBirth(request.getDateOfBirth());
-        student.setDepartment(request.getDepartment().trim());
-        student.setEnrollmentNumber(request.getEnrollmentNumber().trim().toUpperCase());
-        student.setIsActive(request.getIsActive());
+        student.setDepartment(request.getDepartment());
+        student.setEnrollmentNumber(request.getEnrollmentNumber());
+        if (request.getIsActive() != null) {
+            student.setIsActive(request.getIsActive());
+        }
 
-        Student updatedStudent = studentRepository.save(student);
-        log.info("Successfully updated student with id: {}", updatedStudent.getId());
-        return StudentResponse.fromEntity(updatedStudent);
+        Student updated = studentRepository.save(student);
+        return mapToResponse(updated);
     }
 
     @Override
     public void deleteStudent(Long id) {
-        log.info("Attempting to delete student with id: {}", id);
-
+        log.info("Deleting student id: {}", id);
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Student", "id", id));
 
-        // Performing soft delete to preserve audit history
         student.setIsActive(false);
         studentRepository.save(student);
-        log.info("Successfully soft-deleted student with id: {}", id);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public PageResponse<StudentResponse> searchStudents(
-            String keyword,
-            String department,
-            Boolean isActive,
-            int page,
-            int size,
-            String sortBy,
-            String sortDir) {
-        log.info("Searching students - keyword: '{}', department: '{}', isActive: {}, page: {}, size: {}",
-                keyword, department, isActive, page, size);
+    public PageResponse<StudentResponse> searchStudents(String keyword, int page, int size, String sortBy, String sortDir) {
+        log.info("Searching students with keyword: {}", keyword);
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        String search = (keyword == null) ? "" : keyword;
+        Page<Student> studentPage = studentRepository.findByFirstNameContainingIgnoreCaseOrDepartmentContainingIgnoreCase(search, search, pageable);
 
-        Pageable pageable = createPageable(page, size, sortBy, sortDir);
-        Page<Student> studentPage = studentRepository.searchStudents(keyword, department, isActive, pageable);
-        return PageResponse.from(studentPage.map(StudentResponse::fromEntity));
+        return mapToPageResponse(studentPage);
     }
 
-    private Pageable createPageable(int page, int size, String sortBy, String sortDir) {
-        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.DESC.name())
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-        return PageRequest.of(page, size, sort);
+    private StudentResponse mapToResponse(Student student) {
+        return StudentResponse.builder()
+                .id(student.getId())
+                .firstName(student.getFirstName())
+                .lastName(student.getLastName())
+                .email(student.getEmail())
+                .dateOfBirth(student.getDateOfBirth())
+                .department(student.getDepartment())
+                .enrollmentNumber(student.getEnrollmentNumber())
+                .isActive(student.getIsActive())
+                .createdAt(student.getCreatedAt())
+                .updatedAt(student.getUpdatedAt())
+                .build();
+    }
+
+    private PageResponse<StudentResponse> mapToPageResponse(Page<Student> page) {
+        List<StudentResponse> list = new ArrayList<>();
+        for (Student s : page.getContent()) {
+            list.add(mapToResponse(s));
+        }
+
+        return PageResponse.<StudentResponse>builder()
+                .content(list)
+                .pageNumber(page.getNumber())
+                .pageSize(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .isLast(page.isLast())
+                .build();
     }
 }

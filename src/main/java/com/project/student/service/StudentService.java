@@ -17,12 +17,5 @@ public interface StudentService {
 
     void deleteStudent(Long id);
 
-    PageResponse<StudentResponse> searchStudents(
-            String keyword,
-            String department,
-            Boolean isActive,
-            int page,
-            int size,
-            String sortBy,
-            String sortDir);
+    PageResponse<StudentResponse> searchStudents(String keyword, int page, int size, String sortBy, String sortDir);
 }

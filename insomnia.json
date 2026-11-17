@@ -1,0 +1,323 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-11-17T21:05:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_student_api",
+      "_type": "workspace",
+      "parentId": null,
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "name": "Student Management System API",
+      "description": "Production-grade RESTful API documentation for Student Management Capstone Project",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_student_base",
+      "_type": "environment",
+      "parentId": "wrk_student_api",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "auth_user": "admin",
+        "auth_pass": "admin123"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "auth_user",
+          "auth_pass"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1700000000000
+    },
+    {
+      "_id": "fld_students",
+      "_type": "request_group",
+      "parentId": "wrk_student_api",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "name": "Student Endpoints (/api/v1/students)",
+      "description": "CRUD and query operations for Student entities",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -100
+    },
+    {
+      "_id": "fld_actuator",
+      "_type": "request_group",
+      "parentId": "wrk_student_api",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "name": "System & Actuator Endpoints",
+      "description": "Health checks, metrics and OpenAPI documentation",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -50
+    },
+    {
+      "_id": "req_create_student",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students",
+      "name": "Create Student (POST)",
+      "description": "Creates a new student entity",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@university.edu\",\n  \"dateOfBirth\": \"2002-05-15\",\n  \"department\": \"Computer Science\",\n  \"enrollmentNumber\": \"CS-2026-001\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -100,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_student_by_id",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students/1",
+      "name": "Get Student by ID (GET)",
+      "description": "Fetches a student by primary key ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -90,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_get_all_students",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students",
+      "name": "Get All Students Paginated (GET)",
+      "description": "Fetches paginated list of students with sort options",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "disabled": false
+        },
+        {
+          "name": "size",
+          "value": "10",
+          "disabled": false
+        },
+        {
+          "name": "sortBy",
+          "value": "id",
+          "disabled": false
+        },
+        {
+          "name": "sortDir",
+          "value": "asc",
+          "disabled": false
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -80,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_update_student",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students/1",
+      "name": "Update Student Full (PUT)",
+      "description": "Updates all student properties",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"firstName\": \"Johnathan\",\n  \"lastName\": \"Doe\",\n  \"email\": \"johnathan.doe@university.edu\",\n  \"dateOfBirth\": \"2002-05-15\",\n  \"department\": \"Software Engineering\",\n  \"enrollmentNumber\": \"CS-2026-001\",\n  \"isActive\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -70,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_delete_student",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students/1",
+      "name": "Delete Student (DELETE)",
+      "description": "Soft deletes the student record",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -60,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_search_students",
+      "_type": "request",
+      "parentId": "fld_students",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/api/v1/students/search",
+      "name": "Search Students (GET)",
+      "description": "Searches students by keyword, department and active status",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "keyword",
+          "value": "John",
+          "disabled": false
+        },
+        {
+          "name": "department",
+          "value": "Computer Science",
+          "disabled": false
+        },
+        {
+          "name": "isActive",
+          "value": "true",
+          "disabled": false
+        },
+        {
+          "name": "page",
+          "value": "0",
+          "disabled": false
+        },
+        {
+          "name": "size",
+          "value": "10",
+          "disabled": false
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "basic",
+        "useISO88591": false,
+        "disabled": false,
+        "username": "{{ _.auth_user }}",
+        "password": "{{ _.auth_pass }}"
+      },
+      "metaSortKey": -50,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_actuator_health",
+      "_type": "request",
+      "parentId": "fld_actuator",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/actuator/health",
+      "name": "Actuator Health Check (GET)",
+      "description": "Spring Boot Actuator health status",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -40,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_actuator_info",
+      "_type": "request",
+      "parentId": "fld_actuator",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/actuator/info",
+      "name": "Actuator Info (GET)",
+      "description": "Spring Boot Actuator application info",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -30,
+      "isPrivate": false
+    },
+    {
+      "_id": "req_openapi_docs",
+      "_type": "request",
+      "parentId": "fld_actuator",
+      "modified": 1700000000000,
+      "created": 1700000000000,
+      "url": "{{ _.base_url }}/v3/api-docs",
+      "name": "OpenAPI Specification JSON (GET)",
+      "description": "Retrieves the OpenAPI v3 JSON specification",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -20,
+      "isPrivate": false
+    }
+  ]
+}
