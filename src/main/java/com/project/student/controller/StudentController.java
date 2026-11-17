@@ -2,11 +2,9 @@ package com.project.student.controller;
 
 import com.project.student.dto.request.StudentCreateRequest;
 import com.project.student.dto.request.StudentUpdateRequest;
-import com.project.student.dto.response.ApiResponse;
 import com.project.student.dto.response.PageResponse;
 import com.project.student.dto.response.StudentResponse;
 import com.project.student.service.StudentService;
-import com.project.student.util.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
-
 @RestController
 @RequestMapping("/api/v1/students")
 @RequiredArgsConstructor
@@ -35,90 +31,54 @@ public class StudentController {
 
     @PostMapping
     @Operation(summary = "Create Student")
-    public ResponseEntity<ApiResponse<StudentResponse>> createStudent(@Valid @RequestBody StudentCreateRequest request) {
+    public ResponseEntity<StudentResponse> createStudent(@Valid @RequestBody StudentCreateRequest request) {
         StudentResponse response = studentService.createStudent(request);
-        ApiResponse<StudentResponse> apiResponse = ApiResponse.<StudentResponse>builder()
-                .success(true)
-                .message("Student created successfully")
-                .data(response)
-                .timestamp(Instant.now())
-                .build();
-        return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get Student by ID")
-    public ResponseEntity<ApiResponse<StudentResponse>> getStudentById(@PathVariable Long id) {
+    public ResponseEntity<StudentResponse> getStudentById(@PathVariable Long id) {
         StudentResponse response = studentService.getStudentById(id);
-        ApiResponse<StudentResponse> apiResponse = ApiResponse.<StudentResponse>builder()
-                .success(true)
-                .message("Operation completed successfully")
-                .data(response)
-                .timestamp(Instant.now())
-                .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all students paginated")
-    public ResponseEntity<ApiResponse<PageResponse<StudentResponse>>> getAllStudents(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir) {
+    public ResponseEntity<PageResponse<StudentResponse>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
         PageResponse<StudentResponse> pageResponse = studentService.getAllStudents(page, size, sortBy, sortDir);
-        ApiResponse<PageResponse<StudentResponse>> apiResponse = ApiResponse.<PageResponse<StudentResponse>>builder()
-                .success(true)
-                .message("Operation completed successfully")
-                .data(pageResponse)
-                .timestamp(Instant.now())
-                .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(pageResponse);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update student")
-    public ResponseEntity<ApiResponse<StudentResponse>> updateStudent(
+    public ResponseEntity<StudentResponse> updateStudent(
             @PathVariable Long id,
             @Valid @RequestBody StudentUpdateRequest request) {
         StudentResponse response = studentService.updateStudent(id, request);
-        ApiResponse<StudentResponse> apiResponse = ApiResponse.<StudentResponse>builder()
-                .success(true)
-                .message("Student updated successfully")
-                .data(response)
-                .timestamp(Instant.now())
-                .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete student")
-    public ResponseEntity<ApiResponse<Void>> deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
-                .success(true)
-                .message("Student deleted successfully")
-                .data(null)
-                .timestamp(Instant.now())
-                .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search students")
-    public ResponseEntity<ApiResponse<PageResponse<StudentResponse>>> searchStudents(
+    public ResponseEntity<PageResponse<StudentResponse>> searchStudents(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
         PageResponse<StudentResponse> response = studentService.searchStudents(keyword, page, size, sortBy, sortDir);
-        ApiResponse<PageResponse<StudentResponse>> apiResponse = ApiResponse.<PageResponse<StudentResponse>>builder()
-                .success(true)
-                .message("Operation completed successfully")
-                .data(response)
-                .timestamp(Instant.now())
-                .build();
-        return ResponseEntity.ok(apiResponse);
+        return ResponseEntity.ok(response);
     }
 }

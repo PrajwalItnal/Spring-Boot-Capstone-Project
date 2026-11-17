@@ -1,6 +1,6 @@
 # Student Management System - Spring Boot Capstone Project
 
-A production-ready, enterprise-grade RESTful API built according to strict Common Architectural Standards and Layered Package Architecture guidelines.
+A clean, production-ready RESTful API built according to layered package architecture and standard Spring Boot conventions.
 
 ---
 
@@ -20,9 +20,9 @@ A production-ready, enterprise-grade RESTful API built according to strict Commo
 
 ---
 
-## 2. Standard Layered Package Architecture
+## 2. Layered Package Architecture
 
-The project strictly follows the required package hierarchy under `com.project.student`:
+The project adheres to the package hierarchy under `com.project.student`:
 
 ```
 com.project.student
@@ -38,7 +38,6 @@ com.project.student
 │   │   └── StudentUpdateRequest.java
 │   └── response
 │       ├── StudentResponse.java
-│       ├── ApiResponse.java
 │       └── PageResponse.java
 ├── entity
 │   ├── BaseAuditableEntity.java
@@ -50,29 +49,24 @@ com.project.student
 │   └── ErrorDetails.java
 ├── repository
 │   └── StudentRepository.java
-├── service
-│   ├── StudentService.java
-│   └── impl
-│       └── StudentServiceImpl.java
-└── util
-    └── AppConstants.java
+└── service
+    ├── StudentService.java
+    └── impl
+        └── StudentServiceImpl.java
 ```
 
 ---
 
-## 3. Global Exception Handling & Uniform API Envelopes
+## 3. Response Structure & Exception Handling
 
-### Standard Success Response Envelope (`ApiResponse<T>`)
-All non-paged and paged responses adhere to the standard envelope format:
-
-```json
-{
-  "success": true,
-  "message": "Operation completed successfully",
-  "data": { ... },
-  "timestamp": "2026-11-17T15:30:00.123Z"
-}
-```
+### Standard REST Endpoints
+Controllers return standard `ResponseEntity` with status codes and entity response bodies:
+- `POST /api/v1/students` -> `ResponseEntity.status(HttpStatus.CREATED).body(response)`
+- `GET /api/v1/students/{id}` -> `ResponseEntity.ok(response)`
+- `GET /api/v1/students` -> `ResponseEntity.ok(pageResponse)`
+- `PUT /api/v1/students/{id}` -> `ResponseEntity.ok(response)`
+- `DELETE /api/v1/students/{id}` -> `ResponseEntity.noContent().build()`
+- `GET /api/v1/students/search` -> `ResponseEntity.ok(pageResponse)`
 
 ### Standard Error Response Envelope (`ErrorDetails`)
 When an exception occurs, `@RestControllerAdvice` (`GlobalExceptionHandler`) intercepts it and returns:
@@ -91,10 +85,10 @@ When an exception occurs, `@RestControllerAdvice` (`GlobalExceptionHandler`) int
 
 | Exception | HTTP Status | Error Code | Description |
 |---|---|---|---|
-| `MethodArgumentNotValidException` | `400 Bad Request` | `VALIDATION_FAILED` | Captures field-level validation errors map (`Map<String, String>`). |
+| `MethodArgumentNotValidException` | `400 Bad Request` | `VALIDATION_FAILED` | Captures field-level validation errors list. |
 | `ResourceNotFoundException` | `404 Not Found` | `RESOURCE_NOT_FOUND` | Missing entity lookup by ID or key. |
 | `BusinessRuleViolationException` | `400 Bad Request` | `BUSINESS_RULE_VIOLATION` | Business rule invariant violated (e.g., duplicate email/enrollment). |
-| `DataIntegrityViolationException` | `409 Conflict` | `DATA_INTEGRITY_VIOLATION` | Database foreign key or unique constraint violations. |
+| `DataIntegrityViolationException` | `409 Conflict` | `DATA_INTEGRITY_VIOLATION` | Database constraint violations. |
 | `Exception` | `500 Internal Server Error` | `INTERNAL_SERVER_ERROR` | Fallback generic unhandled exception logger. |
 
 ---
@@ -102,107 +96,57 @@ When an exception occurs, `@RestControllerAdvice` (`GlobalExceptionHandler`) int
 ## 4. API Endpoints Specification
 
 Base Path: `/api/v1/students`  
-Authentication: HTTP Basic Auth (`admin`/`admin123` or `user`/`user123`)
+Authentication: HTTP Basic Auth (`admin`/`admin123`)
 
 | HTTP Method | Endpoint | Description | Status Code |
 |---|---|---|---|
 | `POST` | `/api/v1/students` | Create new student | `201 Created` |
 | `GET` | `/api/v1/students/{id}` | Fetch student by primary key ID | `200 OK` |
-| `GET` | `/api/v1/students` | Paginated and sorted query (`page`, `size`, `sortBy`, `sortDir`) | `200 OK` |
+| `GET` | `/api/v1/students` | Paginated query (`page`, `size`, `sortBy`, `sortDir`) | `200 OK` |
 | `PUT` | `/api/v1/students/{id}` | Full update of existing student | `200 OK` |
-| `DELETE` | `/api/v1/students/{id}` | Soft delete student record | `200 OK` |
-| `GET` | `/api/v1/students/search` | Search by `keyword`, `department`, `isActive` with pagination | `200 OK` |
+| `DELETE` | `/api/v1/students/{id}` | Soft delete student record | `204 No Content` |
+| `GET` | `/api/v1/students/search` | Search by `keyword` with pagination | `200 OK` |
 
 ---
 
 ## 5. Security Configuration
 
-Spring Security 6.x HTTP Basic Authentication baseline:
+Spring Security 6.x HTTP Basic Authentication:
 
 - **Public Endpoints**:
   - Swagger UI: `/swagger-ui/**`, `/swagger-ui.html`
-  - OpenAPI Docs: `/v3/api-docs/**`, `/v3/api-docs.yaml`
-  - Actuator Health & Info: `/actuator/health`, `/actuator/info`
+  - OpenAPI Docs: `/v3/api-docs/**`
+  - Actuator: `/actuator/**`
 - **Protected Endpoints**:
   - All `/api/v1/**` endpoints require HTTP Basic Auth credentials.
-- **Default In-Memory Credentials**:
-  - Admin: Username `admin`, Password `admin123` (Roles: `ADMIN`, `USER`)
-  - User: Username `user`, Password `user123` (Roles: `USER`)
+- **Default Credentials**:
+  - Username: `admin`, Password: `admin123`
 
 ---
 
 ## 6. Swagger UI & OpenAPI 3.0 Documentation
 
-- **Interactive Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- **OpenAPI v3 JSON Specs**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
-
-Includes complete schemas, request/response bodies, query parameters, and security schemes.
+- **Swagger UI**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
 ---
 
-## 7. Logging & Actuator
+## 7. Database Schema & Logging
 
-- **SLF4J + Logback**:
-  - Console logging with structured pattern.
-  - Rolling file appender logging to `logs/student-management-system.log` with archive rotation (`logs/archived/`).
-- **Spring Boot Actuator**:
-  - Health check: `GET http://localhost:8080/actuator/health`
-  - Application info: `GET http://localhost:8080/actuator/info`
-  - Application metrics: `GET http://localhost:8080/actuator/metrics`
+- **Database**: PostgreSQL 14+ DDL in [schema.sql](schema.sql).
+- **Logging**: Logback configuration in [src/main/resources/logback-spring.xml](src/main/resources/logback-spring.xml).
+- **Actuator Health**: `http://localhost:8080/actuator/health`
 
 ---
 
-## 8. Database Schema (PostgreSQL 14+)
+## 8. Building and Running
 
-The schema is defined in [schema.sql](schema.sql) and [src/main/resources/schema.sql](src/main/resources/schema.sql):
-
-```sql
-CREATE TABLE students (
-    id BIGSERIAL PRIMARY KEY,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    date_of_birth DATE NOT NULL,
-    department VARCHAR(100) NOT NULL,
-    enrollment_number VARCHAR(50) NOT NULL UNIQUE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITHOUT TIME ZONE,
-    created_by VARCHAR(50),
-    updated_by VARCHAR(50)
-);
-
-CREATE INDEX idx_students_email ON students(email);
-CREATE INDEX idx_students_enrollment_number ON students(enrollment_number);
-CREATE INDEX idx_students_department ON students(department);
-CREATE INDEX idx_students_is_active ON students(is_active);
-CREATE INDEX idx_students_name ON students(first_name, last_name);
-```
-
----
-
-## 9. Insomnia API Collection
-
-A ready-to-import Insomnia v4 export file is available at [insomnia.json](insomnia.json):
-- Includes all student CRUD and Search requests.
-- Pre-configured HTTP Basic Authentication and environment variables (`base_url`, `auth_user`, `auth_pass`).
-- Actuator health and OpenAPI doc requests.
-
----
-
-## 10. Building and Running the Application
-
-### Prerequisites
-- Java 17 LTS or newer
-- Apache Maven 3.9+
-- PostgreSQL 14+ (or run tests using embedded H2)
-
-### Run Unit and Integration Tests
+### Run Tests
 ```bash
 mvn clean test
 ```
 
-### Build Executable JAR
+### Build Package
 ```bash
 mvn clean package
 ```
@@ -210,8 +154,4 @@ mvn clean package
 ### Run Application
 ```bash
 mvn spring-boot:run
-```
-Or execute the packaged JAR:
-```bash
-java -jar target/student-management-system-1.0.0.jar
 ```

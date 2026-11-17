@@ -102,10 +102,8 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.message", is("Student created successfully")))
-                .andExpect(jsonPath("$.data.id", is(1)))
-                .andExpect(jsonPath("$.data.email", is("john.doe@university.edu")));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.email", is("john.doe@university.edu")));
     }
 
     @Test
@@ -134,9 +132,8 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/v1/students/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.data.id", is(1)))
-                .andExpect(jsonPath("$.data.firstName", is("John")));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.firstName", is("John")));
     }
 
     @Test
@@ -170,9 +167,8 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/v1/students?page=0&size=10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.data.content[0].id", is(1)))
-                .andExpect(jsonPath("$.data.totalElements", is(1)));
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.totalElements", is(1)));
     }
 
     @Test
@@ -186,21 +182,19 @@ class StudentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.message", is("Student updated successfully")));
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.firstName", is("John")));
     }
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("DELETE /api/v1/students/{id} - Should return 200 OK on delete")
+    @DisplayName("DELETE /api/v1/students/{id} - Should return 204 No Content on delete")
     void deleteStudent_Success() throws Exception {
         doNothing().when(studentService).deleteStudent(1L);
 
         mockMvc.perform(delete("/api/v1/students/1")
                         .with(csrf()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.message", is("Student deleted successfully")));
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -220,8 +214,7 @@ class StudentControllerTest {
 
         mockMvc.perform(get("/api/v1/students/search?keyword=John"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success", is(true)))
-                .andExpect(jsonPath("$.data.content[0].firstName", is("John")));
+                .andExpect(jsonPath("$.content[0].firstName", is("John")));
     }
 
     @Test
