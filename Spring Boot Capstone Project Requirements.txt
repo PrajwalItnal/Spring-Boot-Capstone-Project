@@ -1,0 +1,108 @@
+Part 1: Common Architectural Standards (All
+Projects)
+1. Technology Stack
+● Runtime: Java 17+ (LTS)
+● Framework: Spring Boot 3.x
+● Persistence: Spring Data JPA / Hibernate
+● Database: PostgreSQL 14+
+● Boilerplate Reduction: Project Lombok
+● Validation: Jakarta Bean Validation (spring-boot-starter-validation)
+● Security: Spring Security 6.x (HTTP Basic Auth baseline; JWT Bearer Token
+optional/bonus)
+● Documentation: Springdoc-OpenAPI / Swagger UI
+(org.springdoc:springdoc-openapi-starter-webmvc-ui:2.x)
+● Logging: SLF4J with Logback
+● Testing: JUnit 5, Mockito, AssertJ
+
+2. Standard Layered Package Architecture
+Every team must adhere strictly to the package hierarchy shown below under
+com.project.<domain>:
+com.project.<domain>
+├── config
+│ ├── OpenApiConfig.java
+│ └── SecurityConfig.java
+├── controller
+
+│ └── <Entity>Controller.java
+├── dto
+│ ├── request
+│ │ ├── <Entity>CreateRequest.java
+│ │ └── <Entity>UpdateRequest.java
+│ └── response
+│ ├── <Entity>Response.java
+│ ├── ApiResponse.java
+│ └── PageResponse.java
+├── entity
+│ ├── BaseAuditableEntity.java
+│ └── <Entity>.java
+├── exception
+│ ├── GlobalExceptionHandler.java
+│ ├── ResourceNotFoundException.java
+│ ├── BusinessRuleViolationException.java
+│ └── ErrorDetails.java
+├── repository
+│ └── <Entity>Repository.java
+├── service
+│ ├── <Entity>Service.java
+│ └── impl
+│ └── <Entity>ServiceImpl.java
+└── util
+└── AppConstants.java
+
+3. Global Exception Handling & Uniform API Envelope
+Standard JSON Response Envelope
+All non-paged endpoints must return the uniform ApiResponse<T>:
+{
+"success": true,
+"message": "Operation completed successfully",
+"data": { ... },
+"timestamp": "2025-05-10T10:15:30.123Z"
+}
+Error Envelope
+When any exception occurs, the GlobalExceptionHandler
+(@RestControllerAdvice) must intercept it and return an ErrorResponse:
+{
+"success": false,
+"errorCode": "RESOURCE_NOT_FOUND",
+"message": "Student with id 42 does not exist",
+"details": ["Path: /api/v1/students/42"],
+"timestamp": "2025-05-10T10:15:30.123Z"
+}
+
+Required Handled Exceptions
+1. MethodArgumentNotValidException (HTTP 400): Capture field-level
+validation errors map (Map<String, String>).
+2. ResourceNotFoundException (HTTP 404): Entity missing by ID or lookup
+key.
+3. BusinessRuleViolationException (HTTP 400 / 409 / 422): Domain
+invariant breached (e.g., balance insufficient, overbooking).
+4. DataIntegrityViolationException (HTTP 409): Foreign key or unique
+constraint violations.
+5. Exception (HTTP 500): Generic fallback logger.
+
+4. Common CRUD & Query Conventions
+For every primary domain entity:
+● POST /api/v1/<entities>: Create entity (201 Created).
+● GET /api/v1/<entities>/{id}: Fetch entity by primary key (200 OK).
+● GET /api/v1/<entities>: Paginated query (page, size, sortBy, sortDir)
+(200 OK).
+● PUT /api/v1/<entities>/{id}: Full update (200 OK).
+● DELETE /api/v1/<entities>/{id}: Soft delete or hard delete (200 OK or
+204 No Content).
+● GET /api/v1/<entities>/search: Filter by keyword / attribute query
+parameters.
+
+
+
+
+
+
+
+Capstone Requirements :
+1. Should be in 10. Git repo with proper Read me and commits
+2. Swagger should be implemented
+3. Proper Logging and actuator 
+4. Proper Project structure
+5. Unit test cases 
+6. Proper DB schema 
+7. Insomonia Docs
