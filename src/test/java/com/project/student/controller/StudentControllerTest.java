@@ -165,7 +165,7 @@ class StudentControllerTest {
 
         when(studentService.getAllStudents(anyInt(), anyInt(), anyString(), anyString())).thenReturn(pageResponse);
 
-        mockMvc.perform(get("/api/v1/students?page=0&size=10"))
+        mockMvc.perform(get("/api/v1/students?page=0&size=10&sortBy=id&sortDir=asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id", is(1)))
                 .andExpect(jsonPath("$.totalElements", is(1)));
@@ -212,7 +212,7 @@ class StudentControllerTest {
         when(studentService.searchStudents(any(), anyInt(), anyInt(), anyString(), anyString()))
                 .thenReturn(pageResponse);
 
-        mockMvc.perform(get("/api/v1/students/search?keyword=John"))
+        mockMvc.perform(get("/api/v1/students/search?keyword=John&page=0&size=10&sortBy=id&sortDir=asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].firstName", is("John")));
     }

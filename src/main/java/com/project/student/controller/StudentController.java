@@ -46,10 +46,10 @@ public class StudentController {
     @GetMapping
     @Operation(summary = "Get all students paginated")
     public ResponseEntity<PageResponse<StudentResponse>> getAllStudents(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortBy,
+            @RequestParam String sortDir) {
         PageResponse<StudentResponse> pageResponse = studentService.getAllStudents(page, size, sortBy, sortDir);
         return ResponseEntity.ok(pageResponse);
     }
@@ -73,11 +73,11 @@ public class StudentController {
     @GetMapping("/search")
     @Operation(summary = "Search students")
     public ResponseEntity<PageResponse<StudentResponse>> searchStudents(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam String keyword,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String sortBy,
+            @RequestParam String sortDir) {
         PageResponse<StudentResponse> response = studentService.searchStudents(keyword, page, size, sortBy, sortDir);
         return ResponseEntity.ok(response);
     }
