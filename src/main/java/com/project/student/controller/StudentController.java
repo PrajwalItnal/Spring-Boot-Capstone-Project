@@ -2,7 +2,6 @@ package com.project.student.controller;
 
 import com.project.student.dto.request.StudentCreateRequest;
 import com.project.student.dto.request.StudentUpdateRequest;
-import com.project.student.dto.response.PageResponse;
 import com.project.student.dto.response.StudentResponse;
 import com.project.student.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/students")
@@ -45,13 +46,13 @@ public class StudentController {
 
     @GetMapping
     @Operation(summary = "Get all students paginated")
-    public ResponseEntity<PageResponse<StudentResponse>> getAllStudents(
+    public ResponseEntity<List<StudentResponse>> getAllStudents(
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam String sortBy,
             @RequestParam String sortDir) {
-        PageResponse<StudentResponse> pageResponse = studentService.getAllStudents(page, size, sortBy, sortDir);
-        return ResponseEntity.ok(pageResponse);
+        List<StudentResponse> list = studentService.getAllStudents(page, size, sortBy, sortDir);
+        return ResponseEntity.ok(list);
     }
 
     @PutMapping("/{id}")
@@ -72,13 +73,13 @@ public class StudentController {
 
     @GetMapping("/search")
     @Operation(summary = "Search students")
-    public ResponseEntity<PageResponse<StudentResponse>> searchStudents(
+    public ResponseEntity<List<StudentResponse>> searchStudents(
             @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam String sortBy,
             @RequestParam String sortDir) {
-        PageResponse<StudentResponse> response = studentService.searchStudents(keyword, page, size, sortBy, sortDir);
-        return ResponseEntity.ok(response);
+        List<StudentResponse> list = studentService.searchStudents(keyword, page, size, sortBy, sortDir);
+        return ResponseEntity.ok(list);
     }
 }

@@ -2,7 +2,6 @@ package com.project.student.service;
 
 import com.project.student.dto.request.StudentCreateRequest;
 import com.project.student.dto.request.StudentUpdateRequest;
-import com.project.student.dto.response.PageResponse;
 import com.project.student.dto.response.StudentResponse;
 import com.project.student.entity.Student;
 import com.project.student.exception.BusinessRuleViolationException;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -142,16 +142,16 @@ class StudentServiceTest {
     }
 
     @Test
-    @DisplayName("Should return paginated students list")
+    @DisplayName("Should return students list")
     void getAllStudents_Success() {
         Page<Student> page = new PageImpl<>(Collections.singletonList(student));
         when(studentRepository.findAll(any(Pageable.class))).thenReturn(page);
 
-        PageResponse<StudentResponse> response = studentService.getAllStudents(0, 10, "id", "asc");
+        List<StudentResponse> response = studentService.getAllStudents(0, 10, "id", "asc");
 
         assertThat(response).isNotNull();
-        assertThat(response.getContent()).hasSize(1);
-        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getId()).isEqualTo(1L);
     }
 
     @Test
@@ -197,10 +197,10 @@ class StudentServiceTest {
         when(studentRepository.findByFirstNameContainingIgnoreCaseOrDepartmentContainingIgnoreCase(
                 eq("John"), eq("John"), any(Pageable.class))).thenReturn(page);
 
-        PageResponse<StudentResponse> response = studentService.searchStudents("John", 0, 10, "id", "asc");
+        List<StudentResponse> response = studentService.searchStudents("John", 0, 10, "id", "asc");
 
         assertThat(response).isNotNull();
-        assertThat(response.getContent()).hasSize(1);
-        assertThat(response.getContent().get(0).getFirstName()).isEqualTo("John");
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getFirstName()).isEqualTo("John");
     }
 }

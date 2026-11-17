@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.student.config.SecurityConfig;
 import com.project.student.dto.request.StudentCreateRequest;
 import com.project.student.dto.request.StudentUpdateRequest;
-import com.project.student.dto.response.PageResponse;
 import com.project.student.dto.response.StudentResponse;
 import com.project.student.exception.ResourceNotFoundException;
 import com.project.student.service.StudentService;
@@ -22,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -152,23 +152,16 @@ class StudentControllerTest {
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("GET /api/v1/students - Should return 200 OK with paginated response")
+    @DisplayName("GET /api/v1/students - Should return 200 OK with list of students")
     void getAllStudents_Success() throws Exception {
-        PageResponse<StudentResponse> pageResponse = PageResponse.<StudentResponse>builder()
-                .content(Collections.singletonList(studentResponse))
-                .pageNumber(0)
-                .pageSize(10)
-                .totalElements(1)
-                .totalPages(1)
-                .isLast(true)
-                .build();
+        List<StudentResponse> list = Collections.singletonList(studentResponse);
 
-        when(studentService.getAllStudents(anyInt(), anyInt(), anyString(), anyString())).thenReturn(pageResponse);
+        when(studentService.getAllStudents(anyInt(), anyInt(), anyString(), anyString())).thenReturn(list);
 
         mockMvc.perform(get("/api/v1/students?page=0&size=10&sortBy=id&sortDir=asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id", is(1)))
-                .andExpect(jsonPath("$.totalElements", is(1)));
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].firstName", is("John")));
     }
 
     @Test
@@ -201,26 +194,20 @@ class StudentControllerTest {
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("GET /api/v1/students/search - Should return 200 OK on query filter")
     void searchStudents_Success() throws Exception {
-        PageResponse<StudentResponse> pageResponse = PageResponse.<StudentResponse>builder()
-                .content(Collections.singletonList(studentResponse))
-                .pageNumber(0)
-                .pageSize(10)
-                .totalElements(1)
-                .totalPages(1)
-                .build();
+        List<StudentResponse> list = Collections.singletonList(studentResponse);
 
         when(studentService.searchStudents(any(), anyInt(), anyInt(), anyString(), anyString()))
-                .thenReturn(pageResponse);
+                .thenReturn(list);
 
         mockMvc.perform(get("/api/v1/students/search?keyword=John&page=0&size=10&sortBy=id&sortDir=asc"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].firstName", is("John")));
+                .andExpect(jsonPath("$[0].firstName", is("John")));
     }
 
     @Test
     @DisplayName("GET /api/v1/students - Should return 401 Unauthorized when unauthenticated")
     void unauthenticatedAccess_Returns401() throws Exception {
-        mockMvc.perform(get("/api/v1/students"))
+        mockMvc.perform(get("/api/v1/students?page=0&size=10&sortBy=id&sortDir=asc"))
                 .andExpect(status().isUnauthorized());
     }
 }

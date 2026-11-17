@@ -2,7 +2,6 @@ package com.project.student.service.impl;
 
 import com.project.student.dto.request.StudentCreateRequest;
 import com.project.student.dto.request.StudentUpdateRequest;
-import com.project.student.dto.response.PageResponse;
 import com.project.student.dto.response.StudentResponse;
 import com.project.student.entity.Student;
 import com.project.student.exception.BusinessRuleViolationException;
@@ -65,13 +64,17 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public PageResponse<StudentResponse> getAllStudents(int page, int size, String sortBy, String sortDir) {
+    public List<StudentResponse> getAllStudents(int page, int size, String sortBy, String sortDir) {
         log.info("Getting all students - page: {}, size: {}", page, size);
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Student> studentPage = studentRepository.findAll(pageable);
 
-        return mapToPageResponse(studentPage);
+        List<StudentResponse> list = new ArrayList<>();
+        for (Student s : studentPage.getContent()) {
+            list.add(mapToResponse(s));
+        }
+        return list;
     }
 
     @Override
@@ -113,14 +116,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public PageResponse<StudentResponse> searchStudents(String keyword, int page, int size, String sortBy, String sortDir) {
+    public List<StudentResponse> searchStudents(String keyword, int page, int size, String sortBy, String sortDir) {
         log.info("Searching students with keyword: {}", keyword);
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         String search = (keyword == null) ? "" : keyword;
         Page<Student> studentPage = studentRepository.findByFirstNameContainingIgnoreCaseOrDepartmentContainingIgnoreCase(search, search, pageable);
 
-        return mapToPageResponse(studentPage);
+        List<StudentResponse> list = new ArrayList<>();
+        for (Student s : studentPage.getContent()) {
+            list.add(mapToResponse(s));
+        }
+        return list;
     }
 
     private StudentResponse mapToResponse(Student student) {
@@ -135,22 +142,6 @@ public class StudentServiceImpl implements StudentService {
                 .isActive(student.getIsActive())
                 .createdAt(student.getCreatedAt())
                 .updatedAt(student.getUpdatedAt())
-                .build();
-    }
-
-    private PageResponse<StudentResponse> mapToPageResponse(Page<Student> page) {
-        List<StudentResponse> list = new ArrayList<>();
-        for (Student s : page.getContent()) {
-            list.add(mapToResponse(s));
-        }
-
-        return PageResponse.<StudentResponse>builder()
-                .content(list)
-                .pageNumber(page.getNumber())
-                .pageSize(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .isLast(page.isLast())
                 .build();
     }
 }

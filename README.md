@@ -37,8 +37,7 @@ com.project.student
 │   │   ├── StudentCreateRequest.java
 │   │   └── StudentUpdateRequest.java
 │   └── response
-│       ├── StudentResponse.java
-│       └── PageResponse.java
+│       └── StudentResponse.java
 ├── entity
 │   ├── BaseAuditableEntity.java
 │   └── Student.java
@@ -63,10 +62,10 @@ com.project.student
 Controllers return standard `ResponseEntity` with status codes and entity response bodies:
 - `POST /api/v1/students` -> `ResponseEntity.status(HttpStatus.CREATED).body(response)`
 - `GET /api/v1/students/{id}` -> `ResponseEntity.ok(response)`
-- `GET /api/v1/students` -> `ResponseEntity.ok(pageResponse)`
+- `GET /api/v1/students` -> `ResponseEntity.ok(list)`
 - `PUT /api/v1/students/{id}` -> `ResponseEntity.ok(response)`
 - `DELETE /api/v1/students/{id}` -> `ResponseEntity.noContent().build()`
-- `GET /api/v1/students/search` -> `ResponseEntity.ok(pageResponse)`
+- `GET /api/v1/students/search` -> `ResponseEntity.ok(list)`
 
 ### Standard Error Response Envelope (`ErrorDetails`)
 When an exception occurs, `@RestControllerAdvice` (`GlobalExceptionHandler`) intercepts it and returns:
